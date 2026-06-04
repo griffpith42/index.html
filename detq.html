@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DetQ — Griffin Pithie</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black: #0a0a0a;
+    --white: #f5f4f0;
+    --gray: #b0aea8;
+    --accent: #e8e4db;
+    --border: rgba(245,244,240,0.12);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--white);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease, width 0.2s ease, height 0.2s ease;
+    mix-blend-mode: difference;
+  }
+  .cursor.hovered { width: 40px; height: 40px; }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.35;
+  }
+
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem 4rem;
+  }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.15em;
+    color: var(--white);
+    text-decoration: none;
+    opacity: 0.6;
+  }
+  .nav-links { display: flex; gap: 2.5rem; align-items: center; }
+  .nav-links a {
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray);
+    text-decoration: none;
+    transition: color 0.3s, gap 0.3s;
+  }
+  .nav-back:hover { color: var(--white); gap: 0.9rem; }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    padding: 10rem 4rem 6rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 4rem;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-tag {
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .hero-tag::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--gray);
+  }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(5rem, 10vw, 8rem);
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    margin-bottom: 1.5rem;
+  }
+  .hero-title .outline {
+    -webkit-text-stroke: 1px var(--white);
+    color: transparent;
+    display: block;
+  }
+  .hero-tagline {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: var(--gray);
+    max-width: 480px;
+    margin-bottom: 3rem;
+  }
+  .hero-tagline strong {
+    color: var(--white);
+    font-weight: 400;
+  }
+  .hero-ctas { display: flex; gap: 2rem; flex-wrap: wrap; }
+  .cta-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--black);
+    background: var(--white);
+    padding: 0.9rem 2rem;
+    text-decoration: none;
+    transition: opacity 0.3s;
+  }
+  .cta-primary:hover { opacity: 0.85; }
+  .cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--white);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+    transition: gap 0.3s, border-color 0.3s;
+  }
+  .cta-secondary:hover { gap: 1.2rem; border-color: var(--white); }
+
+  /* RIGHT PANEL */
+  .hero-right {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .hero-stat {
+    background: var(--black);
+    padding: 2rem;
+    transition: background 0.3s;
+  }
+  .hero-stat:hover { background: #111; }
+  .stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    letter-spacing: 0.03em;
+    line-height: 1;
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+  .stat-desc {
+    font-size: 0.78rem;
+    line-height: 1.6;
+    color: var(--gray);
+    letter-spacing: 0.05em;
+  }
+
+  /* SECTIONS */
+  section { padding: 8rem 4rem; position: relative; }
+  .section-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 4rem;
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .section-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    color: var(--gray);
+    opacity: 0.5;
+  }
+
+  /* OVERVIEW */
+  #overview { border-top: 1px solid var(--border); }
+  .overview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: start;
+  }
+  .overview-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    margin-bottom: 2rem;
+  }
+  .overview-headline em {
+    font-style: italic;
+    -webkit-text-stroke: 1px var(--white);
+    color: transparent;
+  }
+  .overview-body {
+    font-size: 0.95rem;
+    line-height: 1.85;
+    color: var(--gray);
+  }
+  .overview-body p + p { margin-top: 1.2rem; }
+  .overview-right { padding-top: 0.5rem; }
+  .problem-item {
+    border-top: 1px solid var(--border);
+    padding: 2rem 0;
+  }
+  .problem-item h4 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .problem-item h4::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .problem-item p {
+    font-size: 0.88rem;
+    line-height: 1.8;
+    color: var(--gray);
+  }
+  .problem-highlight {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* PIPELINE */
+  #pipeline { border-top: 1px solid var(--border); }
+  .pipeline-intro {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    line-height: 1;
+    max-width: 600px;
+    margin-bottom: 5rem;
+    letter-spacing: 0.03em;
+  }
+  .pipeline-intro em {
+    -webkit-text-stroke: 1px var(--white);
+    color: transparent;
+    font-style: italic;
+  }
+  .pipeline-steps {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 4rem;
+  }
+  .pipeline-step {
+    background: var(--black);
+    padding: 2.5rem 1.5rem;
+    transition: background 0.3s;
+    position: relative;
+  }
+  .pipeline-step:hover { background: #111; }
+  .step-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--gray);
+    opacity: 0.5;
+    margin-bottom: 1.5rem;
+  }
+  .step-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+    line-height: 1.1;
+  }
+  .step-desc {
+    font-size: 0.78rem;
+    line-height: 1.7;
+    color: var(--gray);
+  }
+  .step-badge {
+    display: inline-block;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    border: 1px solid var(--border);
+    color: var(--gray);
+    margin-bottom: 1rem;
+  }
+  .step-badge.det { border-color: rgba(245,244,240,0.3); color: var(--white); }
+  .step-badge.ai-badge { border-color: rgba(176,174,168,0.4); color: var(--gray); }
+
+  /* GUARD RULES */
+  .guard-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .guard-item {
+    background: var(--black);
+    padding: 2rem;
+    transition: background 0.3s;
+  }
+  .guard-item:hover { background: #111; }
+  .guard-id {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--gray);
+    opacity: 0.5;
+    margin-bottom: 0.8rem;
+  }
+  .guard-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.8rem;
+  }
+  .guard-desc {
+    font-size: 0.8rem;
+    line-height: 1.7;
+    color: var(--gray);
+  }
+
+  /* DELIVERABLES */
+  #deliverables { border-top: 1px solid var(--border); }
+  .deliverables-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .deliverable-item {
+    background: var(--black);
+    padding: 3rem;
+    transition: background 0.3s;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    color: inherit;
+  }
+  .deliverable-item:hover { background: #111; }
+  .del-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.8rem;
+    color: var(--gray);
+    opacity: 0.4;
+    margin-bottom: 1.5rem;
+    display: block;
+  }
+  .del-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 0.04em;
+    margin-bottom: 1rem;
+    line-height: 1;
+  }
+  .del-tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+  .del-tag {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--border);
+    color: var(--gray);
+  }
+  .del-desc {
+    font-size: 0.88rem;
+    line-height: 1.8;
+    color: var(--gray);
+    margin-bottom: 2rem;
+  }
+  .del-cta {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    transition: gap 0.3s;
+  }
+  .deliverable-item:hover .del-cta { gap: 1.2rem; }
+  .del-cta span {
+    width: 24px; height: 1px;
+    background: var(--white);
+    transition: width 0.3s;
+  }
+  .deliverable-item:hover .del-cta span { width: 36px; }
+
+  /* TICKER */
+  .ticker-wrap {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    padding: 1.2rem 0;
+    background: var(--black);
+  }
+  .ticker {
+    display: flex;
+    gap: 4rem;
+    animation: ticker 25s linear infinite;
+    white-space: nowrap;
+  }
+  .ticker span {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+    color: var(--gray);
+  }
+  .ticker span.accent { color: var(--white); }
+  @keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* CONTACT */
+  #contact {
+    border-top: 1px solid var(--border);
+    min-height: 50vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .contact-inner {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 4rem;
+  }
+  .contact-big {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 8vw, 7rem);
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+  }
+  .contact-big a {
+    color: var(--white);
+    text-decoration: none;
+    display: block;
+    transition: letter-spacing 0.4s;
+  }
+  .contact-big a:hover { letter-spacing: 0.05em; }
+  .contact-big .outline {
+    -webkit-text-stroke: 1px var(--white);
+    color: transparent;
+    display: block;
+  }
+  .contact-side {
+    padding-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .contact-side a {
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gray);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .contact-side a:hover { color: var(--white); }
+
+  footer {
+    padding: 2rem 4rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  footer p {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray);
+  }
+
+  /* REVEAL */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+
+  @media (max-width: 900px) {
+    nav { padding: 1.5rem 2rem; }
+    .nav-links { display: none; }
+    #hero { grid-template-columns: 1fr; padding: 7rem 2rem 4rem; }
+    .hero-right { display: none; }
+    section { padding: 5rem 2rem; }
+    .overview-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .pipeline-steps { grid-template-columns: 1fr 1fr; }
+    .guard-grid { grid-template-columns: 1fr 1fr; }
+    .deliverables-grid { grid-template-columns: 1fr; }
+    .contact-inner { grid-template-columns: 1fr; }
+    footer { padding: 1.5rem 2rem; flex-direction: column; gap: 1rem; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<nav>
+  <a href="index.html" class="nav-logo">GP</a>
+  <div class="nav-links">
+    <a href="index.html#work">Work</a>
+    <a href="index.html#thesis">Research</a>
+    <a href="index.html#skills">Skills</a>
+    <a href="index.html#contact">Contact</a>
+  </div>
+  <a href="index.html#work" class="nav-back">← Back to Work</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-left">
+    <div class="hero-tag reveal">Capital Markets · NLP · AI Product</div>
+    <h1 class="hero-title reveal reveal-delay-1">
+      <span>Det</span>
+      <span class="outline">Q</span>
+    </h1>
+    <p class="hero-tagline reveal reveal-delay-2">
+      A <strong>deterministic natural language query framework</strong> for corporate bond analytics. 
+      Plain English in. Structured, reproducible data out. 
+      Zero hallucinations by architecture. Every time.
+    </p>
+    <div class="hero-ctas reveal reveal-delay-3">
+      <a href="https://github.com/griffpith42/detq" target="_blank" class="cta-primary">View on GitHub →</a>
+      <a href="#deliverables" class="cta-secondary"><span>→</span> Explore Deliverables</a>
+    </div>
+  </div>
+  <div class="hero-right reveal reveal-delay-1">
+    <div class="hero-stat">
+      <span class="stat-val">2.3M+</span>
+      <span class="stat-desc">Data points across IG and ABS bond markets, validated in production deployment</span>
+    </div>
+    <div class="hero-stat">
+      <span class="stat-val">10</span>
+      <span class="stat-desc">Deterministic guard rules preventing AI hallucination at every query</span>
+    </div>
+    <div class="hero-stat">
+      <span class="stat-val">5–45</span>
+      <span class="stat-desc">Minutes saved per analyst query, recovered from Excel-based manual workflows</span>
+    </div>
+    <div class="hero-stat">
+      <span class="stat-val">100%</span>
+      <span class="stat-desc">Reproducible output, same query produces identical results every time</span>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <span class="accent">DetQ</span>
+    <span>Deterministic Query</span>
+    <span class="accent">—</span>
+    <span>Corporate Bond Analytics</span>
+    <span class="accent">NLP</span>
+    <span>—</span>
+    <span class="accent">Zero Hallucinations</span>
+    <span>Investment Grade</span>
+    <span class="accent">—</span>
+    <span>ABS Markets</span>
+    <span class="accent">Guard Rules</span>
+    <span>—</span>
+    <span class="accent">DetQ</span>
+    <span>Deterministic Query</span>
+    <span class="accent">—</span>
+    <span>Corporate Bond Analytics</span>
+    <span class="accent">NLP</span>
+    <span>—</span>
+    <span class="accent">Zero Hallucinations</span>
+    <span>Investment Grade</span>
+    <span class="accent">—</span>
+    <span>ABS Markets</span>
+    <span class="accent">Guard Rules</span>
+    <span>—</span>
+  </div>
+</div>
+
+<!-- OVERVIEW -->
+<section id="overview">
+  <div class="section-label reveal">
+    <span class="section-num">01</span> The Problem
+  </div>
+  <div class="overview-grid">
+    <div>
+      <h2 class="overview-headline reveal">
+        Analysts answer<br>data questions.<br><em>Not anymore.</em>
+      </h2>
+      <div class="overview-body reveal reveal-delay-1">
+        <p>At every credit fund and bond analytics firm, a structural bottleneck exists: analysts lose 1 to 2 hours per day retrieving data instead of analyzing it. A client asks a question. An analyst opens Excel. Twenty minutes pass.</p>
+        <p>DetQ eliminates that bottleneck. It sits as a query layer on top of your existing database. Analysts type natural language. DetQ returns structured, accurate results in seconds, with no human intervention required.</p>
+        <p>The key architectural insight: AI models should extract intent, not make decisions. Every filter, ranking, and output rule is enforced deterministically in code after the AI runs. The result is a system that cannot hallucinate your data.</p>
+      </div>
+    </div>
+    <div class="overview-right">
+      <div class="problem-item reveal">
+        <h4>The Time Problem</h4>
+        <span class="problem-highlight">1–2 hrs</span>
+        <p>Lost per analyst per day to manual data retrieval in a standard 8am–5pm workday. Simple queries: 2–5 min. Medium: 15–20 min. Complex: 60–90 min.</p>
+      </div>
+      <div class="problem-item reveal reveal-delay-1">
+        <h4>The AI Problem</h4>
+        <span class="problem-highlight">15–70%</span>
+        <p>Hallucination rate in probabilistic AI systems for financial queries (Atil et al., 2025). Generic AI tools cannot safely replace analyst judgment on financial data.</p>
+      </div>
+      <div class="problem-item reveal reveal-delay-2">
+        <h4>The DetQ Answer</h4>
+        <span class="problem-highlight">0%</span>
+        <p>Hallucination rate by architecture. Deterministic guard rules enforce what the user explicitly said, never what the model inferred. Same input, same output, every time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PIPELINE -->
+<section id="pipeline">
+  <div class="section-label reveal">
+    <span class="section-num">02</span> Architecture
+  </div>
+  <h2 class="pipeline-intro reveal">
+    AI for extraction.<br><em>Code</em> for everything else.
+  </h2>
+  <div class="pipeline-steps reveal">
+    <div class="pipeline-step">
+      <div class="step-num">01</div>
+      <span class="step-badge det">Deterministic</span>
+      <div class="step-title">Pre-AI Intent Extraction</div>
+      <p class="step-desc">Ranking intent, Top N, and market routing extracted before any model is called. No AI involved.</p>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">02</div>
+      <span class="step-badge ai-badge">AI Only Stage</span>
+      <div class="step-title">AI Field Extraction</div>
+      <p class="step-desc">Model returns structured JSON only, field values never logic. Constrained to a defined schema with no free-text output.</p>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">03</div>
+      <span class="step-badge det">Deterministic</span>
+      <div class="step-title">Guard Rule Enforcement</div>
+      <p class="step-desc">10 post-AI rules strip ungrounded filters. Numeric intent, entity, UOP, demand, and sector guards applied.</p>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">04</div>
+      <span class="step-badge det">Deterministic</span>
+      <div class="step-title">SQL Generation</div>
+      <p class="step-desc">Parameterized read-only queries. IG/HY via SQL grouping; ABS via in-memory JavaScript aggregation.</p>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">05</div>
+      <span class="step-badge det">Output</span>
+      <div class="step-title">Formatted Result</div>
+      <p class="step-desc">Deal-grouped, Top N enforced, consistent schema. Same output structure for every market and query type.</p>
+    </div>
+  </div>
+
+  <div class="section-label reveal" style="margin-top: 5rem;">
+    <span class="section-num">—</span> Guard Rules
+  </div>
+  <div class="guard-grid reveal">
+    <div class="guard-item">
+      <div class="guard-id">G-01</div>
+      <div class="guard-title">Numeric Intent Gate</div>
+      <p class="guard-desc">Numeric filters only apply if the user explicitly stated a number, unit, or comparison word. Never inferred.</p>
+    </div>
+    <div class="guard-item">
+      <div class="guard-id">G-02</div>
+      <div class="guard-title">Entity Guard</div>
+      <p class="guard-desc">Issuer and ticker filters only kept if a company name or ticker was explicitly in the query.</p>
+    </div>
+    <div class="guard-item">
+      <div class="guard-id">G-03</div>
+      <div class="guard-title">Stop Token Protection</div>
+      <p class="guard-desc">TLAC, GREEN, M&A, UOP never treated as tickers. Mapped to deal flag fields instead.</p>
+    </div>
+    <div class="guard-item">
+      <div class="guard-id">G-04</div>
+      <div class="guard-title">Ranking Pre-Extraction</div>
+      <p class="guard-desc">Sort intent extracted before AI runs, preventing ranking language from becoming filter criteria.</p>
+    </div>
+    <div class="guard-item">
+      <div class="guard-id">G-05</div>
+      <div class="guard-title">UOP Trigger Lock</div>
+      <p class="guard-desc">Use-of-proceeds bucket only activates on "UOP" or "use of proceeds", never from green or TLAC.</p>
+    </div>
+    <div class="guard-item">
+      <div class="guard-id">G-06 through G-10</div>
+      <div class="guard-title">Demand, Exclusion, Pricing, Rating Agency, Sector Sanity</div>
+      <p class="guard-desc">Five additional guards enforcing explicit language requirements for specialist filters.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DELIVERABLES -->
+<section id="deliverables">
+  <div class="section-label reveal">
+    <span class="section-num">03</span> Project Deliverables
+  </div>
+  <div class="deliverables-grid">
+    <a href="https://github.com/griffpith42/detq/blob/main/framework/architecture-overview.md" target="_blank" class="deliverable-item reveal">
+      <span class="del-num">01</span>
+      <div class="del-title">Framework Specification</div>
+      <div class="del-tags">
+        <span class="del-tag">Architecture</span>
+        <span class="del-tag">Technical</span>
+        <span class="del-tag">Markdown</span>
+      </div>
+      <p class="del-desc">Full pipeline specification, component responsibilities, AI integration design, and schema mapping guide. Written for technical evaluators and integration engineers.</p>
+      <div class="del-cta"><span></span> View on GitHub</div>
+    </a>
+    <a href="https://github.com/griffpith42/detq/blob/main/integration-plan/engagement-overview.md" target="_blank" class="deliverable-item reveal reveal-delay-1">
+      <span class="del-num">02</span>
+      <div class="del-title">Integration & Consulting Plan</div>
+      <div class="del-tags">
+        <span class="del-tag">PM Delivery</span>
+        <span class="del-tag">4-Phase</span>
+        <span class="del-tag">8 Weeks</span>
+      </div>
+      <p class="del-desc">Phased engagement plan covering Discovery, Configuration, Validation, and Deployment. Includes milestone checklists, risk register templates, and client-facing scope documentation.</p>
+      <div class="del-cta"><span></span> View on GitHub</div>
+    </a>
+    <a href="https://github.com/griffpith42/detq/blob/main/financial-model/roi-calculator.xlsx" target="_blank" class="deliverable-item reveal">
+      <span class="del-num">03</span>
+      <div class="del-title">ROI Calculator</div>
+      <div class="del-tags">
+        <span class="del-tag">Financial Model</span>
+        <span class="del-tag">Excel</span>
+        <span class="del-tag">Variable</span>
+      </div>
+      <p class="del-desc">Interactive Excel model with three tabs: firm-specific inputs, 3-year projection, and scenario comparison for small/mid/large teams. 61 live formulas, zero errors.</p>
+      <div class="del-cta"><span></span> Download Model</div>
+    </a>
+    <a href="https://github.com/griffpith42/detq/tree/main/pitch-deck" target="_blank" class="deliverable-item reveal reveal-delay-1">
+      <span class="del-num">04</span>
+      <div class="del-title">Executive Pitch Deck</div>
+      <div class="del-tags">
+        <span class="del-tag">14 Slides</span>
+        <span class="del-tag">Canva</span>
+        <span class="del-tag">CEO-Level</span>
+      </div>
+      <p class="del-desc">14-slide presentation covering the problem, architecture, four CEO-level pillars, proof of concept, engagement model, and ROI. Built on validated analyst survey data.</p>
+      <div class="del-cta"><span></span> View Deck</div>
+    </a>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-label reveal">
+    <span class="section-num">04</span> Interested?
+  </div>
+  <div class="contact-inner">
+    <div class="contact-big reveal">
+      <a href="mailto:griffinpithie42@gmail.com">Let's<br>Talk.</a>
+      <span class="outline">DetQ.</span>
+    </div>
+    <div class="contact-side reveal">
+      <a href="mailto:griffinpithie42@gmail.com">griffinpithie42@gmail.com</a>
+      <a href="tel:+17819749917">+1 781-974-9917</a>
+      <a href="https://github.com/griffpith42/detq" target="_blank">GitHub Repo ↗</a>
+      <a href="index.html#work">Back to Work ↑</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Griffin Pithie · DetQ · Deterministic Query Framework</p>
+  <a href="GriffinPithieResume.pdf" target="_blank" style="font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase; color: var(--gray); text-decoration:none; transition: color 0.3s;" onmouseover="this.style.color='var(--white)'" onmouseout="this.style.color='var(--gray)'">Download Resume →</a>
+</footer>
+
+<script>
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+  });
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+  });
+
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+  document.querySelectorAll('#hero .reveal').forEach(el => el.classList.add('visible'));
+</script>
+</body>
+</html>
